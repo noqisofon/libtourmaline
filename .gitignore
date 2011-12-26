@@ -1,0 +1,38 @@
+\#*#
+*~
+*.*~
+*.txt
+*.log
+*.diff
+*.pidb
+*.sh
+*.rb
+*.o
+*.a
+*.dylib
+*.dll
+*.lib
+*.list
+.DS_Store
+
+Makefile
+GNUMakefile
+
+# ./
+/autom4*.cache/
+/configure
+/config.status
+/commit_message.tmp
+/documents
+/TAGS
+/*.anjuta
+/TODO.tasks
+/.anjuta_sym_db.db
+
+# ./src
+/src/.deps
+
+# ./include
+/include/config.h
+/include/config.in
+/include/stamp-h1
