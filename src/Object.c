@@ -6,9 +6,9 @@
 #   include <gc.h>
 #endif  /* def TOUR_WITH_GC */
 
-#include "tour-api.h"
-#include "Class.h"
-#include "Object.h"
+#include "tour/tour-api.h"
+#include "tour/Class.h"
+#include "tour/Object.h"
 
 
 #define OBJ_ALLOC(_object_)    (*_tour_object_allocate)( _object_ )

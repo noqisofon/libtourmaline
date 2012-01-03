@@ -1,11 +1,12 @@
 #include "config.h"
 
-#include "runtime.h"
-#include "sarray.h"
-#include "encoding.h"
-#include "runtime-info.h"
-#include "messaging.h"
-#include "Class.h"
+#include "tour/runtime.h"
+#include "tour/sarray.h"
+#include "tour/encoding.h"
+#include "tour/runtime-info.h"
+#include "tour/messaging.h"
+
+#include "tour/Class.h"
 
 #define gen_rtx(args...)  1
 #define get_rtx_MEM(args...)  1

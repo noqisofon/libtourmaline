@@ -12,10 +12,12 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_CHECK_LIB(pthread, pthread_create, [LIBS="$LIBS -pthread"])
+AC_CHECK_LIB(gc, GC_malloc, [LIBS="$LIBS -lgc"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stddef.h stdlib.h string.h])
 AC_CHECK_HEADERS(pthread.h,, [AC_MSG_ERROR([pthread.h required])])
+AC_CHECK_HEADERS(gc.h)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE

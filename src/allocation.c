@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "runtime.h"
-#include "allocation.h"
+#include "tour/runtime.h"
+#include "tour/allocation.h"
 
 
 #ifdef TOUR_WITH_GC

@@ -1,7 +1,7 @@
 #include <assert.h>
 
-#include "runtime.h"
-#include "hash.h"
+#include "tour/runtime.h"
+#include "tour/hash.h"
 
 
 #define FULLNESS(cache)                             \

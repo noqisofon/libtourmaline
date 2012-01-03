@@ -1,7 +1,7 @@
 #include "config.h"
 
-#include "runtime.h"
-#include "Object.h"
+#include "tour/runtime.h"
+#include "tour/Object.h"
 
 
 tour_mutex_t __tour_runtime_mutex = NULL;

@@ -8,7 +8,7 @@
 #   include <unwind-pe.h>
 #endif  /* def HAVE_UNWIND_PE_H */
 
-#include "tour-api.h"
+#include "tour/tour-api.h"
 
 #define __tour_exception_class                                      \
     ((((((((_Unwind_Exception_Class)'G'                             \

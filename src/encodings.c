@@ -2,8 +2,8 @@
 
 #include <stdlib.h>
 
-#include "tour-api.h"
-#include "encoding.h"
+#include "tour/tour-api.h"
+#include "tour/encoding.h"
 
 
 #if defined(MAX)

@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "tour.h"
-#include "encoding.h"
+#include "tour/tour.h"
+#include "tour/encoding.h"
 
 
 #if defined(TOUR_WITH_GC) && TOUR_WITH_GC

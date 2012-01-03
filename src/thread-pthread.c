@@ -1,7 +1,7 @@
 #include <pthread.h>
 
-#include "runtime.h"
-#include "thread.h"
+#include "tour/runtime.h"
+#include "tour/thread.h"
 
 
 static pthread_key_t _tour_thread_storage;

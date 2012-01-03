@@ -1,10 +1,10 @@
 #include "config.h"
 
 #include <stdio.h>
-
-#include "sarray.h"
-#include "runtime.h"
 #include <assert.h>
+
+#include "tour/sarray.h"
+#include "tour/runtime.h"
 
 
 int global_nbuckets = 0;

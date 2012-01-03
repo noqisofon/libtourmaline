@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-#include "runtime.h"
-#include "thread.h"
+#include "tour/runtime.h"
+#include "tour/thread.h"
 
 #define  __TOUR_RUNTIME_LOCK             tour_mutex_lock( __tour_runtime_mutex )
 #define  __TOUR_RUNTIME_UNLOCK           tour_mutex_unlock( __tour_runtime_mutex )

@@ -1,7 +1,7 @@
 #include "config.h"
 #include <stdlib.h>
 
-#include "runtime.h"
+#include "tour/runtime.h"
 
 
 static tour_error_handler _tour_error_handler = NULL;

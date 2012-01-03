@@ -1,7 +1,7 @@
-#include "runtime.h"
-#include "sarray.h"
-#include "encoding.h"
-#include "selector.h"
+#include "tour/runtime.h"
+#include "tour/sarray.h"
+#include "tour/encoding.h"
+#include "tour/selector.h"
 
 
 #define SELECTOR_HASH_SIZE 128

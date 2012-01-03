@@ -1,15 +1,15 @@
 #include "config.h"
 
-#include "tour.h"
-#include "tour-api.h"
-#include "runtime.h"
-#include "messaging.h"
+#include "tour/tour.h"
+#include "tour/tour-api.h"
+#include "tour/runtime.h"
+#include "tour/messaging.h"
 
 #include <string.h>
 #include <stdlib.h>
 
-#include "thread.h"
-#include "Class.h"
+#include "tour/thread.h"
+#include "tour/Class.h"
 
 
 #define tour_new(_type_) (_type_ *)tour_malloc( sizeof(_type_) )
