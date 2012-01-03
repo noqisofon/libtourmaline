@@ -1,23 +1,23 @@
-#include "assert.h"
+#include <assert.h>
 
-#include "tour/hash.h"
-#include "tour/runtime.h"
+#include "runtime.h"
+#include "hash.h"
 
 
-#define FULLNESS(cache) \
+#define FULLNESS(cache)                             \
     ((((cache)->size * 75) / 100) <= (cache)->used)
-#define EXPANSION(cache) \
+#define EXPANSION(cache)                        \
     ((cache)->size * 2)
 
-#define HASH(self, key) \
-    ((*(self)->hash_func)( (self), key ))
-#define COMPARE(self, left, right) \
-    ((*(self)->compare_func)( (self), left, right ))
+#define HASH(_self_, _key_)                     \
+    ((*(_self_)->hash_func)( (_self_), _key_ ))
+#define COMPARE(_self_, _left_, _right_)            \
+    ((*(_self_)->compare_func)( _left_, _right_ ))
 
 
-cache_ptr tour_hash_new(unsigend int size, hash_func_type hash_func, compare_func_type compare_func)
+cache_ptr tour_hash_new(unsigned int size, hash_func_type hash_func, compare_func_type compare_func)
 {
-    cache_ptr cahce;
+    cache_ptr cache;
 
     assert( size );
     assert( !(size & (size - 1) ) );
@@ -25,7 +25,7 @@ cache_ptr tour_hash_new(unsigend int size, hash_func_type hash_func, compare_fun
     cache = (cache_ptr)tour_calloc( 1, sizeof(struct cache) );
     assert( cache );
 
-    cache->node_table = (cache_ptr *)tour_calloc( size, sizeof(node_ptr) );
+    cache->node_table = (node_ptr *)tour_calloc( size, sizeof(node_ptr) );
     assert( cache->node_table );
 
     cache->size = size;
@@ -110,7 +110,7 @@ void tour_hash_add(cache_ptr* cache_p, const void* key, void* value)
 void tour_hash_remove(cache_ptr cache, const void* key)
 {
     /* size_t index = (*cache->hash_func)( cache, key ); */
-    size_t index = HASH(cache_p, key);
+    size_t index = HASH(cache, key);
     node_ptr node = cache->node_table[index];
 
     assert( node );
@@ -120,26 +120,26 @@ void tour_hash_remove(cache_ptr cache, const void* key)
         tour_free( node );
     } else {
         node_ptr prev = node;
-        boolean removed = false;
+        Boolean removed = FALSE;
 
         do {
             /* if ( (*cache->compare_func)( node->key, key ) ) { */
-            if ( HASH( cache, node->key, key ) )
-                prev->next = node->next, removed = true;
+            if ( COMPARE( cache, node->key, key ) ) {
+                prev->next = node->next, removed = TRUE;
                 tour_free( node );
             } else
                 prev = node, node = node->next;
         } while ( !removed && node );
         assert( removed );
     }
-    -- (*cache_p)->used;
+    -- cache->used;
 }
 
 
 node_ptr tour_hash_next(cache_ptr cache, node_ptr node)
 {
     if ( !node )
-        cache->lash_bucket = 0;
+        cache->last_bucket = 0;
 
     if ( node ) {
         if ( node->next )
@@ -178,17 +178,17 @@ void* tour_hash_value_for_key(cache_ptr cache, const void* key)
 }
 
 
-boolean tour_hash_is_key_in_hash(cache_ptr cache, const void* key)
+Boolean tour_hash_is_key_in_hash(cache_ptr cache, const void* key)
 {
     node_ptr node = cache->node_table[HASH(cache, key)];
 
     if ( node ) {
         do {
             if ( COMPARE( cache, node->key, key ) ) {
-                return true;
+                return TRUE;
             } else
                 node = node->next;
         } while ( node );
     }
-    return false;
+    return FALSE;
 }

@@ -1,9 +1,10 @@
+#include "config.h"
 
 #include <stdio.h>
 
-#include "tour/sarray.h"
-#include "tour/runtime.h"
-#include "assert.h"
+#include "sarray.h"
+#include "runtime.h"
+#include <assert.h>
 
 
 int global_nbuckets = 0;
@@ -59,7 +60,7 @@ void sarray_remove_garbage(void)
 }
 
 
-void sarry_at_put(struct sarray* array, sidx index, void* element)
+void sarray_at_put(struct sarray* array, sidx index, void* element)
 {
 #ifdef TOUR_SPARSE3
     struct sindex** the_index;
@@ -91,7 +92,7 @@ void sarry_at_put(struct sarray* array, sidx index, void* element)
 #   endif  /* def TOUR_SPARSE3 */
 #endif  /* def PRECOMPUTE_SELECTORS */
 
-    assert( s_offset_decode(index) < array->capacity );
+    assert( soffset_decode(index) < array->capacity );
 
 #ifdef TOUR_SPARSE3
     the_index = &(array->indices[ioffset]);
@@ -136,7 +137,7 @@ void sarry_at_put(struct sarray* array, sidx index, void* element)
         new_bucket = (struct sbucket *)tour_malloc( sizeof(struct sbucket) );
         memcpy( (void *)new_bucket,
                 (const void *)array->empty_bucket,
-                sizeof(struct bucket) );
+                sizeof(struct sbucket) );
         new_bucket->version.version = array->version.version;
         *the_bucket = new_bucket;
 
@@ -148,7 +149,7 @@ void sarry_at_put(struct sarray* array, sidx index, void* element)
         new_bucket = (struct sbucket *)tour_malloc( sizeof(struct sbucket) );
         memcpy( new_bucket,
                 old_bucket,
-                sizeof(struct bucket) );
+                sizeof(struct sbucket) );
         new_bucket->version.version = array->version.version;
         *the_bucket = new_bucket;
 
@@ -177,7 +178,7 @@ struct sarray* sarray_new(int size, void* default_element)
     struct sindex** new_indices;
 #else
     size_t num_indices = ( (size - 1) / (BUCKET_SIZE) ) + 1;
-    struct sindex** new_indices;
+    struct sbucket** new_buckets;
 #endif  /* def TOUR_SPARSE3 */
     size_t i;
 
@@ -213,21 +214,21 @@ struct sarray* sarray_new(int size, void* default_element)
     array->ref_count = 1;
     array->is_copy_of = NULL;
 
-    for ( count = 0; i < BUCKET_SIZE; ++ i ) {
+    for ( i = 0; i < BUCKET_SIZE; ++ i ) {
         array->empty_bucket->elems[i] = default_element;
     }
 
 #ifdef TOUR_SPARSE3
-    for ( count = 0; i < INDEX_SIZE; ++ i ) {
+    for ( i = 0; i < INDEX_SIZE; ++ i ) {
         array->empty_index->buckets[i] = array->empty_bucket;
     }
 
-    for ( count = 0; i < num_indices; ++ i ) {
+    for ( i = 0; i < num_indices; ++ i ) {
         new_indices[i] = array->empty_index;
     }
 #else
-    for ( count = 0; i < num_indices; ++ i ) {
-        new_indices[i] = array->empty_index;
+    for ( i = 0; i < num_indices; ++ i ) {
+        new_buckets[i] = array->empty_bucket;
     }
 #endif  /* def TOUR_SPARSE3 */
 
@@ -265,7 +266,7 @@ void sarray_realloc(struct sarray* array, int newsize)
     if ( rounded_size <= array->capacity )
         return ;
 
-    aseert( array->ref_count == 1 );
+    assert( array->ref_count == 1 );
 
     if ( rounded_size > array->capacity ) {
 #ifdef TOUR_SPARSE3
@@ -280,10 +281,10 @@ void sarray_realloc(struct sarray* array, int newsize)
 
 #ifdef TOUR_SPARSE3
         old_indices = array->indices;
-        new_indices = (struct sindex **)objs_malloc( (new_max_index + 1) * sizeof(struct sindex *) );
+        new_indices = (struct sindex **)tour_malloc( (new_max_index + 1) * sizeof(struct sindex *) );
 #else
         old_buckets = array->buckets;
-        new_buckets = (struct sbucket **)objs_malloc( (new_max_index + 1) * sizeof(struct sbucket *) );
+        new_buckets = (struct sbucket **)tour_malloc( (new_max_index + 1) * sizeof(struct sbucket *) );
 #endif  /* def TOUR_SPARSE3 */
 
         for ( i = 0; i <= old_max_index; ++ i ) {
@@ -309,19 +310,19 @@ void sarray_realloc(struct sarray* array, int newsize)
 #endif  /* def TOUR_SPARSE3 */
 
 #ifdef TOUR_SPARSE3
-        sarray_freegarbage( old_indices );
+        sarray_free_garbage( old_indices );
 #else
-        sarray_freegarbage( old_buckets );
+        sarray_free_garbage( old_buckets );
 #endif  /* def TOUR_SPARSE3 */
 
-        idx_size += (new_max_index - old_max_index);
+        global_idx_size += (new_max_index - old_max_index);
 
         return ; // なくてもよくね？
     }
 }
 
 
-void sarray_free(struct sarrat* array)
+void sarray_free(struct sarray* array)
 {
 #ifdef TOUR_SPARSE3
     size_t old_max_index = (array->capacity - 1) / INDEX_CAPACITY;
@@ -440,7 +441,7 @@ struct sarray* sarray_lazy_copy(struct sarray* other_array)
     array->buckets = new_buckets;
 #endif  /* def TOUR_SPARSE3 */
 
-    idx_size += num_indices;
+    global_idx_size += num_indices;
     ++ global_narrays;
 
     return array;

@@ -1,13 +1,11 @@
-
-
-#include "tconfig.h"
+#include "config.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "tour/tour.h"
-#include "tour/encoding.h"
+#include "tour.h"
+#include "encoding.h"
 
 
 #if defined(TOUR_WITH_GC) && TOUR_WITH_GC
@@ -185,7 +183,7 @@ static void __tour_gc_type_description_from_type(GC_bitmap mask, const char* typ
 }
 
 
-static void __tour_class_structure_encoding(Class class, char** type, int* size, int* current)
+static void __tour_class_structure_encoding(Class_ref class, char** type, int* size, int* current)
 {
     int i, ivar_count;
     struct tour_ivar_list* ivars;
@@ -220,7 +218,7 @@ static void __tour_class_structure_encoding(Class class, char** type, int* size,
 }
 
 
-void __tour_generate_gc_type_description(Class class)
+void __tour_generate_gc_type_description(Class_ref class)
 {
     GC_bitmap mask;
     int bits_no, size;
@@ -287,7 +285,7 @@ static inline boolean __tour_ivar_pointer(const char* type)
 }
 
 
-void class_ivar_set_gcinvisible(Class class, const char* ivar_name, boolean gc_invisible)
+void class_ivar_set_gcinvisible(Class_ref class, const char* ivar_name, boolean gc_invisible)
 {
     int i, ivar_count;
     struct tour_ivar_list* ivars;
@@ -354,14 +352,14 @@ void class_ivar_set_gcinvisible(Class class, const char* ivar_name, boolean gc_i
 #else  /* !defined(TOUR_WITH_GC) && !TOUR_WITH_GC */
 
 
-void __tour_generate_gc_type_description(Class class __attribute__ ((unused)) )
+void __tour_generate_gc_type_description(Class_ref class __attribute__ ((unused)) )
 {
 }
 
 
-void class_ivar_set_gcinvisible( Class class __attribute__ ((unused)),
+void class_ivar_set_gcinvisible( Class_ref class __attribute__ ((unused)),
                                  const char* ivar_name __attribute__ ((unused)),
-                                 boolean gc_invisible __attribute__ ((unused)) )
+                                 Boolean gc_invisible __attribute__ ((unused)) )
 {
 }
 

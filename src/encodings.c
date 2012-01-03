@@ -1,15 +1,16 @@
+#include "config.h"
 
 #include <stdlib.h>
 
-#include "tour/tour-api.h"
-#include "tour/encoding.h"
+#include "tour-api.h"
+#include "encoding.h"
 
 
 #if defined(MAX)
 #   undef MAX
 #endif  /* defined(MAX) */
 
-#defube  MAX(_x_, _y_)                          \
+#define  MAX(_x_, _y_)                          \
     ({ typeof(_x_) __x = (_x_), __y = (_y_);    \
     ( __x > __y ? __x : __y );})
 
@@ -17,7 +18,7 @@
 #   undef MIN
 #endif  /* defined(MIN) */
 
-#defube  MIN(_x_, _y_)                          \
+#define  MIN(_x_, _y_)                          \
     ({ typeof(_x_) __x = (_x_), __y = (_y_);    \
     ( __x < __y ? __x : __y );})
 
@@ -37,23 +38,24 @@
 
 #define    VECTOR_TYPE           _C_VECTOR
 
-#define    TYPE_FIELDS(_type_)               ({ const char* _field = (_type_) + 1; \
+#define    TYPE_FIELDS(_type_)                                          \
+    ({ const char* _field = (_type_) + 1;                               \
     while ( *_field != _C_STRUCT_E && *_field != _C_STRUCT_B            \
             && *_field != _C_UNION_B && *_field ++ != '=' )             \
         /* do nothing */ ;                                              \
-    _field;                                                             \
-        })
+    _field; })
 
 #define    DECL_MODE(_type_)     *(_type_)
 #define    TYPE_MODE(_type_)     *(_type_)
 
 #define    DFmode                _C_DBL
 
-#define    get_inner_array_type(_type_)               ( { const char* _field = (_type_); \
+#define    get_inner_array_type(_type_)                                 \
+    ( { const char* _field = (_type_);                                  \
     while ( *_field == _C_ARY_B ) {                                     \
         while ( isdigit( (unsigned char)* ++ _field ) ) ;               \
     }                                                                   \
-    _field;} )
+    _field; } )
 
 
 #ifndef BITS_PER_UNIT
@@ -95,7 +97,7 @@ int tour_sizeof_type(const char* type)
     }
 
     switch ( *type ) {
-        case C_BOOL:
+        case _C_BOOL:
 #if __GNUC__ != 2
             return sizeof(_Bool);
             break;
@@ -105,7 +107,7 @@ int tour_sizeof_type(const char* type)
             break;
 
         case _C_CLASS:
-            return sizeof(Class);
+            return sizeof(Class_ref);
             break;
 
         case _C_SEL:
@@ -197,7 +199,7 @@ int tour_sizeof_type(const char* type)
         break;
 
         case _C_UNION_B:
-        case _S_STRUCT_B:
+        case _C_STRUCT_B:
         {
             struct tour_struct_layout layout;
             unsigned int size;
@@ -266,7 +268,7 @@ int tour_sizeof_type(const char* type)
 
                 default:
                 {
-                    tour_error( nil, TOUR_ERR_BAD_TYPE, "unknown complex type %s\n", type );
+                    tour_error( nil, TOUR_ERR_BAD_CLASS, "unknown complex type %s\n", type );
 
                     return 0;
                 }
@@ -276,7 +278,7 @@ int tour_sizeof_type(const char* type)
 
         default:
             {
-                    tour_error( nil, TOUR_ERR_BAD_TYPE, "unknown type %s\n", type );
+                    tour_error( nil, TOUR_ERR_BAD_CLASS, "unknown type %s\n", type );
 
                     return 0;
             }
@@ -291,7 +293,7 @@ int tour_alignof_type(const char* type)
     }
 
     switch ( *type ) {
-        case C_BOOL:
+        case _C_BOOL:
 #if __GNUC__ != 2
             return __alignof__(_Bool);
             break;
@@ -301,7 +303,7 @@ int tour_alignof_type(const char* type)
             break;
 
         case _C_CLASS:
-            return __alignof__(Class);
+            return __alignof__(Class_ref);
             break;
 
         case _C_SEL:
@@ -393,7 +395,7 @@ int tour_alignof_type(const char* type)
         break;
 
         case _C_UNION_B:
-        case _S_STRUCT_B:
+        case _C_STRUCT_B:
         {
             struct tour_struct_layout layout;
             unsigned int size;
@@ -462,7 +464,7 @@ int tour_alignof_type(const char* type)
 
                 default:
                 {
-                    tour_error( nil, TOUR_ERR_BAD_TYPE, "unknown complex type %s\n", type );
+                    tour_error( nil, TOUR_ERR_BAD_CLASS, "unknown complex type %s\n", type );
 
                     return 0;
                 }
@@ -472,7 +474,7 @@ int tour_alignof_type(const char* type)
 
         default:
         {
-            tour_error( nil, TOUR_ERR_BAD_TYPE, "unknown type %s\n", type );
+            tour_error( nil, TOUR_ERR_BAD_CLASS, "unknown type %s\n", type );
 
             return 0;
         }
@@ -518,7 +520,7 @@ inline const char* tour_skip_type_qualifiers(const char* type)
             || *type == _C_BYCOPY
             || *type == _C_BYREF
             || *type == _C_ONEWAY
-            || *type == _C_GCINVISIVLE ) {
+            || *type == _C_GCINVISIBLE ) {
         type += 1;
     }
     return type;
@@ -573,7 +575,7 @@ const char* tour_skip_typespec(const char* type)
             if ( *type == _C_ARY_E )
                 return ++ type;
             else {
-                tour_error( nil, TOUR_ERR_BAD_TYPE, "bad array type %s\n", type );
+                tour_error( nil, TOUR_ERR_BAD_CLASS, "bad array type %s\n", type );
 
                 return 0;
             }
@@ -606,7 +608,7 @@ const char* tour_skip_typespec(const char* type)
 
         default:
         {
-            tour_error( nil, TOUR_ERR_BAD_TYPE, "unknown type %s\n", type );
+            tour_error( nil, TOUR_ERR_BAD_CLASS, "unknown type %s\n", type );
 
             return 0;
         }
@@ -618,7 +620,7 @@ inline const char* tour_skip_offset(const char* type)
 {
     if ( *type == '+' )
         type ++;
-    while ( isdigit( (unsigned char)* ++ char ) )
+    while ( isdigit( (unsigned char)* ++ type ) )
         ;
     return type;
 }
@@ -653,3 +655,244 @@ int method_get_sizeof_arguments(struct tour_method* mth)
 
     return atoi( type );
 }
+
+
+char* method_get_next_argument(arglist_t arg_frame, const char** type)
+{
+    const char* t = tour_skip_argspec( *type );
+
+    if ( *t == '\0' )
+        return NULL;
+
+    *type = t;
+    t = tour_skip_typespec( t );
+
+    if ( *t == '+' )
+        return arg_frame->arg_regs + atoi( ++ t );
+    else
+        return arg_frame->arg_ptr + atoi( t );
+}
+
+
+char* method_get_first_argument(struct tour_method* m, arglist_t arg_frame, const char** type)
+{
+    *type = m->method_types;
+
+    return method_get_next_argument( arg_frame, type );
+}
+
+
+char* method_get_nth_argument(struct tour_method* m, arglist_t arg_frame, int arg, const char** type)
+{
+    const char* t = tour_skip_argspec( m->method_types );
+
+    if ( arg > method_get_number_of_arguments( m ) )
+        return 0;
+
+    while ( arg -- )
+        t = tour_skip_argspec( t );
+
+    *type = t;
+    t = tour_skip_typespec( t );
+
+    if ( *t == '+' )
+        return arg_frame->arg_regs + atoi( ++ t );
+    else
+        return arg_frame->arg_ptr + atoi( t );
+}
+
+
+unsigned tour_get_type_qualifiers(const char* type)
+{
+    unsigned res = 0;
+    Boolean flag = TRUE;
+
+    while ( flag ) {
+        switch ( *type ++ ) {
+            case _C_CONST:        res |= _F_CONST; break;
+            case _C_IN:           res |= _F_IN; break;
+            case _C_INOUT:        res |= _F_INOUT; break;
+            case _C_OUT:          res |= _F_OUT; break;
+            case _C_BYCOPY:       res |= _F_BYCOPY; break;
+            case _C_BYREF:        res |= _F_BYREF; break;
+            case _C_ONEWAY:       res |= _F_ONEWAY; break;
+            case _C_GCINVISIBLE:  res |= _F_GCINVISIBLE; break;
+
+            default: flag = FALSE;
+        }
+    }
+    return res;
+}
+
+
+void tour_layout_structure(const char* type, struct tour_struct_layout* layout)
+{
+    const char* ntype;
+
+    if ( *type != _C_UNION_B && *type != _C_STRUCT_B ) {
+        tour_error( nil,
+                    TOUR_ERR_BAD_CLASS,
+                    "record (or union) type expected in tour_layout_structure, got %n\n",
+                    type );
+    }
+
+    type ++;
+    layout->original_type = type;
+
+    ntype = type;
+    while ( *ntype != _C_STRUCT_E && *ntype != _C_STRUCT_B && *type != _C_UNION_B
+            && *ntype ++ != '=' )
+        /* do nothing */ ;
+
+    if ( *(ntype - 1) == '=' )
+        type = ntype;
+
+    layout->type = type;
+    layout->prev_type = NULL;
+    layout->record_size = 0;
+    layout->record_align = BITS_PER_UNIT;
+
+    layout->record_align = MAX(layout->record_align, STRUCTURE_SIZE_BOUNDARY);
+}
+
+
+Boolean tour_layout_structure_next_member(struct tour_struct_layout* layout)
+{
+    register int desired_align = 0;
+
+    register const char* bfld_type = 0;
+    register int bfld_type_size,
+        bfld_type_align = 0,
+        bfld_field_size = 0;
+
+    const char* type;
+    Boolean unionp = layout->original_type[-1] == _C_UNION_B;
+
+    if ( layout->prev_type ) {
+        type = tour_skip_type_qualifiers( layout->prev_type );
+        if ( unionp )
+            layout->record_size = MAX(layout->record_size, tour_sizeof_type( type ) * BITS_PER_UNIT);
+        else if ( *type != _C_BFLD )
+            layout->record_size += tour_sizeof_type( type ) * BITS_PER_UNIT;
+        else {
+            for ( bfld_type = type + 1; isdigit( (unsigned char)*bfld_type ); ++ bfld_type )
+                /* do nothing */ ;
+
+            bfld_type_size = tour_sizeof_type( bfld_type ) * BITS_PER_UNIT;
+            bfld_type_align = tour_alignof_type( bfld_type ) * BITS_PER_UNIT;
+            bfld_field_size = atoi( tour_skip_typespec( bfld_type ) );
+
+            layout->record_size += bfld_field_size;
+        }
+    }
+
+    if ( *layout->type == '"' ) {
+        for ( layout->type ++; *layout->type ++ != '"'; )
+            /* do nothing */ ;
+    }
+
+    type = tour_skip_type_qualifiers( layout->type );
+
+    if ( *type != _C_BFLD )
+        desired_align = tour_alignof_type( bfld_type ) * BITS_PER_UNIT;
+    else {
+        desired_align = 1;
+
+        for ( bfld_type = type + 1; isdigit( (unsigned char)*bfld_type ); bfld_type ++ )
+            /* do nothing */ ;
+
+        bfld_type_size = tour_sizeof_type( bfld_type ) * BITS_PER_UNIT;
+        bfld_type_align = tour_alignof_type( bfld_type ) * BITS_PER_UNIT;
+        bfld_field_size = atoi( tour_skip_typespec( bfld_type ) );
+    }
+#ifdef BIGGEST_FIELD_ALIGNMENT
+    desired_align = MIN(desired_align, BIGGEST_FIELD_ALIGNMENT);
+#endif  /* def BIGGEST_FIELD_ALIGNMENT */
+
+#ifdef ADJUST_FIELD_ALIGNMENT
+    desired_align = MIN(desired_align, ADJUST_FIELD_ALIGNMENT);
+#endif  /* def ADJUST_FIELD_ALIGNMENT */
+
+#ifndef PCC_BITFIELD_TYPE_MATTERS
+    layout->record_align = MAX(layout->record_align, desired_align);
+#else
+    if ( *type == _C_BFLD ) {
+        if ( bfld_field_size )
+            layout->record_align = MAX(layout->record_align, desired_align);
+        else
+            desired_align = tour_alignof_type( bfld_type ) * BITS_PER_UNIT;
+    
+
+        {
+            int type_align = bfld_type_align;
+#   if 0
+            if ( maximum_field_alignment != 0 )
+                type_align = MIN(type_align, maximum_field_alignment);
+            else if ( DECL_PACKED( field ) )
+                type_align = MIN(type_align, BITS_PER_UNIT);
+#   endif  /* 0 */
+            layout->record_align = MAX(layout->record_align, type_align);
+        }
+    } else
+        layout->record_align = MAX(layout->record_align, desired_align);
+#endif  /* ndef PCC_BITFIELD_TYPE_MATTERS */
+
+    if ( *type == _C_BFLD )
+        layout->record_size = atoi( type + 1 );
+    else if ( layout->record_size % desired_align != 0 ) {
+        layout->record_size = ROUND(layout->record_size, desired_align);
+    }
+
+    layout->prev_type = layout->type;
+    layout->type = tour_skip_typespec( layout->type );
+
+    return TRUE;
+}
+
+
+void tour_layout_finish_structure(struct tour_struct_layout* layout, unsigned int* size, unsigned int* align)
+{
+    Boolean unionp = layout->original_type[-1] == _C_UNION_B;
+
+    if ( layout->type
+         && (( !unionp && *layout->type == _C_STRUCT_E )
+             || ( unionp && *layout->type == _C_UNION_E ) ) ) {
+#if defined(ROUND_TYPE_ALIGN) && !defined(__sparc__)
+        layout->record_align = ROUND_TYPE_ALIGN(layout->original_type - 1,
+                                                1,
+                                                layout->record_align);
+#else  /* !( defined(ROUND_TYPE_ALIGN) && !defined(__sparc__) ) */
+        layout->record_align = MAX(1, layout->record_align);
+#endif  /* defined(ROUND_TYPE_ALIGN) && !defined(__sparc__) */
+
+#ifdef ROUND_TYPE_SIZE
+        layout->record_align = ROUND_TYPE_ALIGN(layout->original_type,
+                                                layout->record_size,
+                                                layout->record_align);
+#else  /* ndef ROUND_TYPE_SIZE */
+        layout->record_size = ROUND(layout->record_size, layout->record_align);
+#endif  /* def ROUND_TYPE_SIZE */
+
+        layout->type = NULL;
+    }
+    if ( size )
+        *size = layout->record_size / BITS_PER_UNIT;
+    if ( align )
+        *align = layout->record_align / BITS_PER_UNIT;
+}
+
+
+void tour_layout_structure_get_info(struct tour_struct_layout* layout, unsigned int* offset, unsigned int* align, const char** type)
+{
+    if ( offset )
+        *offset = layout->record_size / BITS_PER_UNIT;
+    if ( align )
+        *align = layout->record_align / BITS_PER_UNIT;
+    if ( type )
+        *type = layout->prev_type;
+}
+
+
+// Local Variables:
+//   coding: utf-8
+// End:

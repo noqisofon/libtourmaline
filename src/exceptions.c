@@ -1,14 +1,14 @@
-
-
 #include "config.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "tour/tour-api.h"
+#include <unwind.h>
+#ifdef HAVE_UNWIND_PE_H
+#   include <unwind-pe.h>
+#endif  /* def HAVE_UNWIND_PE_H */
 
-#include "unwind.h"
-#include "unwind-pe.h"
-
+#include "tour-api.h"
 
 #define __tour_exception_class                                      \
     ((((((((_Unwind_Exception_Class)'G'                             \
@@ -21,13 +21,13 @@
      << 8 | (_Unwind_Exception_Class)'C')
 
 
-struct Tour_Exception {
+struct tour_exception {
     struct _Unwind_Exception base;
 
     id value;
 
-    _Unwind_Ptr landngPad;
-    int handlerSwitchValue;
+    _Unwind_Ptr landing_pad;
+    int handler_switch_value;
 };
 
 
@@ -47,31 +47,40 @@ static const unsigned char* parse_lsda_header(struct _Unwind_Context* context, c
     _Unwind_Word tmp;
     unsigned char lpstart_encoding;
 
-    info->Start = ( context ? _UNwind_GetRegionStart( context ) : 0 );
+    info->Start = ( context ? _Unwind_GetRegionStart( context ) : 0 );
 
     lpstart_encoding = *p ++;
+#ifdef HAVE_UNWIND_PE_H
     if ( lpstart_encoding != DW_EH_PE_omit )
         p = read_encoded_value( context, lpstart_encoding, p, &info->LPStart );
     else
         info->LPStart = info->Start;
+#else
+    info->LPStart = info->Start;
+#endif  /* def HAVE_UNWIND_PE_H */
 
     info->ttype_encoding = *p ++;
-
+#ifdef HAVE_UNWIND_PE_H
     if ( info->ttype_encoding != DW_EH_PE_omit ) {
         p = read_uleb128( p, &tmp );
         info->TType = p + tmp;
     } else
         info->TType = 0;
+#else
+    info->TType = 0;
+#endif  /* def HAVE_UNWIND_PE_H */
 
     info->call_site_encoding = *p ++;
+#ifdef HAVE_UNWIND_PE_H
     p = read_uleb128( p, &tmp );
+#endif  /* def HAVE_UNWIND_PE_H */
     info->action_table = p + tmp;
 
     return p;
 }
 
 
-static Class get_ttype_entry(struct lsda_header_info* info, _Unwind_Word i)
+static Class_ref get_ttype_entry(struct lsda_header_info* info, _Unwind_Word i)
 {
     _Unwind_Ptr ptr;
 
@@ -87,9 +96,9 @@ static Class get_ttype_entry(struct lsda_header_info* info, _Unwind_Word i)
 }
 
 
-static int isKindOf(id value, Class target)
+static int isKindOf(id value, Class_ref target)
 {
-    Class c;
+    Class_ref c;
 
     if ( target == NULL )
         return 1;
@@ -116,7 +125,7 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
                                           struct _Unwind_Exception* ue_header,
                                           struct _Unwind_Context* context )
 {
-    struct Tour_Exception* xh = (struct Tour_Exception *)ue_header;
+    struct tour_exception* xh = (struct tour_exception *)ue_header;
 
     struct lsda_header_info info;
     const unsigned char* language_specific_data;
@@ -130,10 +139,10 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
     if ( version != 1 )
         return _URC_FATAL_PHASE1_ERROR;
 
-    if ( actions == (_UA_CLEANUP_ERROR | _UA_HANDLER_FRAME) 
+    if ( actions == (_UA_CLEANUP_PHASE | _UA_HANDLER_FRAME) 
          && exception_class == __tour_exception_class ) {
-        handler_switch_value = xh->handlerSwitchValue;
-        landing_pad = xh->landingPad;
+        handler_switch_value = xh->handler_switch_value;
+        landing_pad = xh->landing_pad;
 
         goto install_context;
     }
@@ -144,7 +153,9 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
         return _URC_CONTINUE_UNWIND;
 
     p = parse_lsda_header( context, language_specific_data, &info );
+#ifdef HAVE_UNWIND_PE_H
     info.ttype_base = base_of_encoded_value( info.ttype_encoding, context );
+#endif  /* def HAVE_UNWIND_PE_H */
     ip = _Unwind_GetIP( context ) - 1;
     landing_pad = 0;
     action_record = 0;
@@ -170,12 +181,12 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
     while ( p < info.action_table ) {
         _Unwind_Ptr cs_start, cs_len, cs_lp;
         _Unwind_Word cs_action;
-
+#ifdef HAVE_UNWIND_PE_H
         p = read_encoded_value( 0, info.call_site_encoding, p, &cs_start );
         p = read_encoded_value( 0, info.call_site_encoding, p, &cs_len );
         p = read_encoded_value( 0, info.call_site_encoding, p, &cs_lp );
         p = read_uleb128( p, &cs_action );
-
+#endif  /* def HAVE_UNWIND_PE_H */
         if ( ip < info.Start + cs_start )
             p = info.action_table;
         else if ( ip < info.Start + cs_start + cs_len ) {
@@ -215,7 +226,7 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
                 ;
             else if ( ar_filter > 0 ) {
 
-                Class catch_type = get_ttype_entry( &info, ar_filter );
+                Class_ref catch_type = get_ttype_entry( &info, ar_filter );
 
                 if ( isKindOf( xh->value, catch_type ) ) {
                     handler_switch_value = ar_filter;
@@ -241,8 +252,8 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
             return _URC_CONTINUE_UNWIND;
 
         if ( exception_class == __tour_exception_class ) {
-            xh->handlerSwitchValue = handler_switch_value;
-            xh->landingPad = landing_pad;
+            xh->handler_switch_value = handler_switch_value;
+            xh->landing_pad = landing_pad;
         }
         return _URC_HANDLER_FOUND;
     }
@@ -268,7 +279,14 @@ _Unwind_Reason_Code PERSONALITY_FUNCTION( int version,
 }
 
 
-static void __tour_exception_cleanup(_Unwind_Reason_Code code __attribute_((unused)), struct _Unwind_Exception* exc)
+#if 0
+#   define __UNUSED__ __attribute_((unused))
+#else
+#   define __UNUSED__
+#endif
+
+
+static void __tour_exception_cleanup(_Unwind_Reason_Code code __UNUSED__, struct _Unwind_Exception* exc)
 {
     free( exc );
 }
@@ -276,7 +294,7 @@ static void __tour_exception_cleanup(_Unwind_Reason_Code code __attribute_((unus
 
 void tour_exception_throw(id value)
 {
-    struct Tour_Exception* header = calloc( 1, sizeof(*header) );
+    struct tour_exception* header = calloc( 1, sizeof(*header) );
 
     header->base.exception_class = __tour_exception_class;
     header->base.exception_cleanup = __tour_exception_cleanup;
