@@ -9,10 +9,12 @@
 *.rb
 *.o
 *.a
+*.la
 *.dylib
 *.dll
 *.lib
 *.list
+TAGS
 .DS_Store
 
 Makefile
@@ -24,15 +26,21 @@ GNUMakefile
 /config.status
 /commit_message.tmp
 /documents
-/TAGS
 /*.anjuta
 /TODO.tasks
 /.anjuta_sym_db.db
-
-# ./src
-/src/.deps
+/depcomp
+/install-sh
+/missing
 
 # ./include
 /include/config.h
 /include/config.in
 /include/stamp-h1
+
+# ./src
+/src/.deps
+
+# ./tests/tourmaline
+/tests/tourmaline/.deps
+/tests/tourmaline/test-get-sel

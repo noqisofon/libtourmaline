@@ -42,7 +42,9 @@ struct lsda_header_info {
 };
 
 
-static const unsigned char* parse_lsda_header(struct _Unwind_Context* context, const unsigned char* p, struct lsda_header_info* info)
+static const unsigned char* parse_lsda_header( struct _Unwind_Context* context,
+                                               const unsigned char* p,
+                                               struct lsda_header_info* info )
 {
     _Unwind_Word tmp;
     unsigned char lpstart_encoding;
@@ -103,7 +105,7 @@ static int isKindOf(id value, Class_ref target)
     if ( target == NULL )
         return 1;
 
-    for ( c = value->class_pointer; c; c = class_get_super_class( c ) ) {
+    for ( c = value->class_pointer; c; c = Class_get_super_class( c ) ) {
         if ( c == target )
             return 1;
     }

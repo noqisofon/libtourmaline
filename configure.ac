@@ -12,12 +12,12 @@ AC_PROG_CC
 
 # Checks for libraries.
 AC_CHECK_LIB(pthread, pthread_create, [LIBS="$LIBS -pthread"])
-AC_CHECK_LIB(gc, GC_malloc, [LIBS="$LIBS -lgc"])
+#AC_CHECK_LIB(gc, GC_malloc, [LIBS="$LIBS -lgc"])
 
 # Checks for header files.
 AC_CHECK_HEADERS([limits.h stddef.h stdlib.h string.h])
 AC_CHECK_HEADERS(pthread.h,, [AC_MSG_ERROR([pthread.h required])])
-AC_CHECK_HEADERS(gc.h)
+#AC_CHECK_HEADERS(gc.h)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
@@ -27,5 +27,14 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_PROG_RANLIB
 AC_CHECK_FUNCS([memset])
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile tests/tourmaline/Makefile])
+AC_ARG_ENABLE(enable_test,
+    [  --enable-tests  Turn on tests ],
+    [ case "${enableval}" in
+      yes) enable_test=true ;;
+      no)  enable_test=false ;;
+      *)   AC_MSG_ERROR(bad balue ${enableval} for --enable-tests) ;;
+      esac],
+    [enable_test=false])
+AM_CONDITIONAL(ENABLE_TESTS, test x$enable_test = xtrue)
 AC_OUTPUT

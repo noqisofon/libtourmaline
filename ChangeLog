@@ -1,0 +1,96 @@
+commit 4dd3f7e781b8db838b9a5e5200952536cafd939d
+Author: ned rihine <ned.rihine@gmail.com>
+Date:   Tue Jan 3 22:55:17 2012 +0900
+
+    local fix the header inclusion.
+
+ COPYING              |  674 +++++++++++++++++++++++++++++++++++
+ INSTALL              |  370 +++++++++++++++++++
+ Makefile.in          |  689 +++++++++++++++++++++++++++++++++++
+ aclocal.m4           |  970 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ configure.ac         |    2 +
+ depcomp              |  688 +++++++++++++++++++++++++++++++++++
+ include/config.h.in  |   82 +++++
+ install-sh           |  527 +++++++++++++++++++++++++++
+ missing              |  376 +++++++++++++++++++
+ src/Class.c          |   12 +-
+ src/Makefile.am      |   18 +-
+ src/Makefile.in      |  650 +++++++++++++++++++++++++++++++++
+ src/Object.c         |    6 +-
+ src/allocation.c     |    4 +-
+ src/encodings.c      |    4 +-
+ src/error-handling.c |    2 +-
+ src/exceptions.c     |    2 +-
+ src/gc.c             |    4 +-
+ src/hash.c           |    4 +-
+ src/init.c           |    4 +-
+ src/messaging.c      |   13 +-
+ src/sarray.c         |    6 +-
+ src/selector.c       |    8 +-
+ src/thread-pthread.c |    4 +-
+ src/thread.c         |    4 +-
+ 25 files changed, 5082 insertions(+), 41 deletions(-)
+
+commit eef141e867584b199902fed0029e52b6984776f6
+Author: ned rihine <ned.rihine@gmail.com>
+Date:   Tue Jan 3 22:34:42 2012 +0900
+
+    libobjc copyed.
+
+ Makefile.am                   |    1 +
+ configure.ac                  |   29 ++
+ include/tour/Class.h          |  165 ++++++++
+ include/tour/GenericTypes.h   |  121 ++++++
+ include/tour/Object.h         |   97 +++++
+ include/tour/allocation.h     |   31 ++
+ include/tour/config.h         |   74 ++++
+ include/tour/encoding.h       |  105 +++++
+ include/tour/error-handling.h |   32 ++
+ include/tour/hash.h           |  113 +++++
+ include/tour/ivar.h           |   31 ++
+ include/tour/messaging.h      |   24 ++
+ include/tour/runtime-info.h   |    5 +
+ include/tour/runtime.h        |   74 ++++
+ include/tour/sarray.h         |  235 +++++++++++
+ include/tour/selector.h       |   60 +++
+ include/tour/thread.h         |  163 ++++++++
+ include/tour/tour-api.h       |   23 +
+ include/tour/tour-decls.h     |   18 +
+ include/tour/tour-list.h      |  112 +++++
+ include/tour/tour.h           |   77 ++++
+ include/tour/tour_list.h      |   41 ++
+ src/Class.c                   |  472 ++++++++++++++++++++++
+ src/Makefile.am               |    5 +
+ src/Object.c                  |  103 +++++
+ src/allocation.c              |  110 +++++
+ src/config.h.in               |   73 ++++
+ src/encodings.c               |  898 +++++++++++++++++++++++++++++++++++++++++
+ src/encodings.h               |  655 ------------------------------
+ src/error-handling.c          |   46 +++
+ src/exceptions.c              |   68 ++--
+ src/gc.c                      |   20 +-
+ src/hash.c                    |   42 +-
+ src/init.c                    |   28 ++
+ src/main.c                    |   21 +
+ src/messaging.c               |  633 +++++++++++++++++++++++++++++
+ src/sarray.c                  |   43 +-
+ src/selector.c                |  420 +++++++++++++++++++
+ src/thread-pthread.c          |  174 ++++++++
+ src/thread.c                  |  359 ++++++++++++++++
+ 40 files changed, 5068 insertions(+), 733 deletions(-)
+
+commit cbb2731fb0a46e2100bc8418810b8ed6f485d455
+Author: ned rihine <ned.rihine@gmail.com>
+Date:   Tue Dec 27 01:04:47 2011 +0900
+
+    first commit.
+
+ .gitignore       |   38 +++
+ src/classes.c    |  452 +++++++++++++++++++++++++++++++++++++
+ src/encodings.h  |  655 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/exceptions.c |  297 ++++++++++++++++++++++++
+ src/gc.c         |  369 ++++++++++++++++++++++++++++++
+ src/hash.c       |  194 ++++++++++++++++
+ src/objects.c    |   84 +++++++
+ src/sarray.c     |  447 +++++++++++++++++++++++++++++++++++++
+ 8 files changed, 2536 insertions(+), 0 deletions(-)
